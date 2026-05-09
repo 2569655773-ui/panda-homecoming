@@ -1,176 +1,37 @@
-const ui = {
-  cover: document.getElementById('cover'),
-  ending: document.getElementById('ending'),
-  chapter: document.getElementById('chapter'),
-  score: document.getElementById('score'),
-  task: document.getElementById('task'),
-  dialog: document.getElementById('dialog'),
-  speaker: document.getElementById('speaker'),
-  text: document.getElementById('dialogText'),
-  next: document.getElementById('nextBtn'),
-  skip: document.getElementById('skipBtn'),
-  start: document.getElementById('startBtn'),
-  restart: document.getElementById('restartBtn'),
-  endingText: document.getElementById('endingText'),
+const ui={
+  cover:document.getElementById('cover'),ending:document.getElementById('ending'),chapter:document.getElementById('chapter'),score:document.getElementById('score'),task:document.getElementById('task'),dialog:document.getElementById('dialog'),speaker:document.getElementById('speaker'),text:document.getElementById('dialogText'),next:document.getElementById('nextBtn'),skip:document.getElementById('skipBtn'),start:document.getElementById('startBtn'),restart:document.getElementById('restartBtn'),endingText:document.getElementById('endingText'),game:document.getElementById('game')
 };
-
-const chapters = [
-  {
-    title: '第一章：雨城出发', place: '雨城', top: 0x0f766e, bottom: 0x082f49, target: 3, itemName: '生态线索',
-    items: [{x:260,y:420,label:'雨城水滴'}, {x:540,y:310,label:'巡护脚印'}, {x:860,y:230,label:'路线标记'}],
-    hazards: [{x:720,y:508,w:130,h:24,label:'噪声干扰'}],
-    lines: [['巡护员','欢迎来到雅安雨城。今天，你要带“小雨团”完成一次归山任务。'], ['小雨团','我需要找到安全路线，也要避开会打扰栖息地的噪声。'], ['巡护员','收集3个绿色生态线索，完成后继续前往森林巡护区。']]
-  },
-  {
-    title: '第二章：森林巡护', place: '森林', top: 0x166534, bottom: 0x052e16, target: 4, itemName: '清理物',
-    items: [{x:220,y:470,label:'塑料瓶'}, {x:420,y:350,label:'旧包装'}, {x:720,y:270,label:'干扰牌'}, {x:990,y:400,label:'废纸团'}],
-    hazards: [{x:520,y:508,w:110,h:24,label:'施工噪声'}, {x:900,y:508,w:120,h:24,label:'游客越线'}],
-    lines: [['巡护员','森林不是背景，它是动物真正的家。'], ['小雨团','我会把干扰物带走，让路线恢复安静。'], ['巡护员','收集4个清理物，生态值会提升。']]
-  },
-  {
-    title: '第三章：茶山同行', place: '茶山', top: 0x84cc16, bottom: 0x365314, target: 4, itemName: '茶山知识',
-    items: [{x:180,y:420,label:'蒙顶山茶'}, {x:400,y:310,label:'生态茶园'}, {x:680,y:230,label:'雨雾气候'}, {x:980,y:350,label:'古道记忆'}],
-    hazards: [{x:330,y:508,w:120,h:24,label:'农残风险'}, {x:790,y:508,w:120,h:24,label:'水土流失'}],
-    lines: [['茶山讲解员','雅安不只有熊猫，也有茶山、雨雾和古道记忆。'], ['小雨团','原来生态保护和地方产业也可以联系在一起。'], ['茶山讲解员','找到4个茶山知识点，前往最后的栖息地。']]
-  },
-  {
-    title: '第四章：熊猫归山', place: '栖息地', top: 0x0f172a, bottom: 0x14532d, target: 5, itemName: '守护标记',
-    items: [{x:160,y:450,label:'安静区'}, {x:360,y:330,label:'水源地'}, {x:620,y:240,label:'竹林带'}, {x:860,y:340,label:'巡护点'}, {x:1080,y:430,label:'归山路'}],
-    hazards: [{x:470,y:508,w:110,h:24,label:'强光干扰'}, {x:760,y:508,w:130,h:24,label:'投喂风险'}, {x:1030,y:508,w:120,h:24,label:'越界拍摄'}],
-    lines: [['巡护员','最后一段路，需要把所有守护标记点亮。'], ['小雨团','好的文旅体验，不是打扰自然，而是理解自然。'], ['巡护员','完成5个守护标记，让小雨团回到山里。']]
-  }
+const W=1280,H=720,canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+canvas.width=W;canvas.height=H;canvas.style.width='100%';canvas.style.height='100%';canvas.style.display='block';ui.game.innerHTML='';ui.game.appendChild(canvas);
+const chapters=[
+{title:'第一章：雨城出发',place:'雨城',top:'#0f766e',bottom:'#082f49',target:3,itemName:'生态线索',items:[[260,420,'雨城水滴'],[540,310,'巡护脚印'],[860,230,'路线标记']],hazards:[[720,560,130,26,'噪声干扰']],lines:[['巡护员','欢迎来到雅安雨城。今天，你要带“小雨团”完成一次归山任务。'],['小雨团','我需要找到安全路线，也要避开会打扰栖息地的噪声。'],['巡护员','收集3个绿色生态线索，完成后继续前往森林巡护区。']]},
+{title:'第二章：森林巡护',place:'森林',top:'#166534',bottom:'#052e16',target:4,itemName:'清理物',items:[[220,470,'塑料瓶'],[420,350,'旧包装'],[720,270,'干扰牌'],[990,400,'废纸团']],hazards:[[520,560,110,26,'施工噪声'],[900,560,120,26,'游客越线']],lines:[['巡护员','森林不是背景，它是动物真正的家。'],['小雨团','我会把干扰物带走，让路线恢复安静。'],['巡护员','收集4个清理物，生态值会提升。']]},
+{title:'第三章：茶山同行',place:'茶山',top:'#84cc16',bottom:'#365314',target:4,itemName:'茶山知识',items:[[180,420,'蒙顶山茶'],[400,310,'生态茶园'],[680,230,'雨雾气候'],[980,350,'古道记忆']],hazards:[[330,560,120,26,'农残风险'],[790,560,120,26,'水土流失']],lines:[['茶山讲解员','雅安不只有熊猫，也有茶山、雨雾和古道记忆。'],['小雨团','原来生态保护和地方产业也可以联系在一起。'],['茶山讲解员','找到4个茶山知识点，前往最后的栖息地。']]},
+{title:'第四章：熊猫归山',place:'栖息地',top:'#0f172a',bottom:'#14532d',target:5,itemName:'守护标记',items:[[160,450,'安静区'],[360,330,'水源地'],[620,240,'竹林带'],[860,340,'巡护点'],[1080,430,'归山路']],hazards:[[470,560,110,26,'强光干扰'],[760,560,130,26,'投喂风险'],[1030,560,120,26,'越界拍摄']],lines:[['巡护员','最后一段路，需要把所有守护标记点亮。'],['小雨团','好的文旅体验，不是打扰自然，而是理解自然。'],['巡护员','完成5个守护标记，让小雨团回到山里。']]}
 ];
-
-const state = { started:false, chapterIndex:0, score:0, collected:0, locked:true, dialogueQueue:[], currentLine:0 };
-let sceneInstance = null;
-
-function startGame(){
-  ui.cover.style.display = 'none';
-  state.started = true;
-  if (sceneInstance) sceneInstance.playDialogue(chapters[state.chapterIndex].lines);
-}
-
-ui.start.addEventListener('click', startGame);
-ui.start.addEventListener('touchstart', (event) => { event.preventDefault(); startGame(); }, {passive:false});
-
-class MainScene extends Phaser.Scene {
-  constructor(){ super('main'); }
-
-  create(){
-    sceneInstance = this;
-    this.makeTextures();
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.keys = this.input.keyboard.addKeys('A,D,W,SPACE');
-    this.worldGroup = this.add.group();
-    this.platforms = this.physics.add.staticGroup();
-    this.items = this.physics.add.group({ allowGravity:false, immovable:true });
-    this.hazards = this.physics.add.staticGroup();
-    this.player = this.physics.add.sprite(120, 420, 'panda');
-    this.player.setCollideWorldBounds(true).setBounce(.08);
-    this.player.body.setSize(44,52).setOffset(10,8);
-    this.physics.add.collider(this.player, this.platforms);
-    this.physics.add.overlap(this.player, this.items, this.collectItem, null, this);
-    this.physics.add.overlap(this.player, this.hazards, this.hitHazard, null, this);
-    this.loadChapter(0);
-    ui.next.addEventListener('click', () => this.advanceDialogue());
-    ui.skip.addEventListener('click', () => this.hideDialogue());
-    ui.restart.addEventListener('click', () => { ui.ending.style.display='none'; state.score=0; state.chapterIndex=0; state.started=true; this.loadChapter(0); this.playDialogue(chapters[0].lines); });
-  }
-
-  makeTextures(){
-    const g=this.add.graphics();
-    g.fillStyle(0xffffff,1).fillCircle(32,28,22).fillCircle(32,56,24);
-    g.fillStyle(0x111827,1).fillCircle(15,18,9).fillCircle(49,18,9).fillEllipse(23,29,12,15).fillEllipse(41,29,12,15);
-    g.fillStyle(0xffffff,1).fillCircle(24,28,3).fillCircle(40,28,3);
-    g.fillStyle(0x111827,1).fillCircle(32,36,4).fillEllipse(15,55,12,22).fillEllipse(49,55,12,22);
-    g.fillStyle(0x86efac,1).fillRoundedRect(23,67,18,8,4);
-    g.generateTexture('panda',64,82);
-
-    g.clear().fillStyle(0x86efac,1).fillCircle(16,16,14).lineStyle(3,0xffffff,.8).strokeCircle(16,16,10).fillStyle(0x052e16,1).fillTriangle(16,6,25,23,7,23).generateTexture('eco',32,32);
-    g.clear().fillStyle(0xef4444,1).fillRoundedRect(0,0,110,24,8).lineStyle(2,0xffffff,.45).strokeRoundedRect(3,3,104,18,6).generateTexture('hazard',110,24);
-    g.clear().fillStyle(0x3f6212,1).fillRoundedRect(0,0,220,22,10).fillStyle(0x84cc16,1).fillRoundedRect(0,0,220,7,4).generateTexture('platform',220,22);
-    g.clear().fillStyle(0xffffff,.9).fillCircle(22,20,16).fillCircle(42,16,20).fillCircle(64,21,15).fillRoundedRect(18,22,58,16,8).generateTexture('cloud',90,44);
-
-    g.clear().fillStyle(0x166534,1).fillRoundedRect(12,10,12,90,6).fillStyle(0x4ade80,1);
-    g.fillEllipse(10,20,36,12); g.fillEllipse(31,36,36,12); g.fillEllipse(8,54,36,12); g.fillEllipse(32,72,36,12);
-    g.generateTexture('bamboo',44,110);
-
-    g.clear().fillStyle(0x65a30d,1).fillEllipse(110,58,240,88).lineStyle(3,0x365314,.45);
-    for(let i=0;i<8;i++){ g.beginPath(); g.moveTo(10+i*28,64); g.lineTo(40+i*28,35); g.strokePath(); }
-    g.generateTexture('hill',240,90);
-    g.destroy();
-  }
-
-  clearWorld(){ this.worldGroup.clear(true,true); this.platforms.clear(true,true); this.items.clear(true,true); this.hazards.clear(true,true); }
-
-  paintBackground(ch){
-    const g=this.add.graphics(); this.worldGroup.add(g);
-    g.fillGradientStyle(ch.top,ch.top,ch.bottom,ch.bottom,1).fillRect(0,0,1280,720);
-    g.fillStyle(0x0f172a,.18).fillTriangle(-50,520,220,210,520,520).fillTriangle(320,520,610,170,940,520).fillTriangle(760,520,1050,220,1360,520);
-    if(ch.place==='雨城'){
-      g.fillStyle(0x67e8f9,.13).fillEllipse(730,610,880,130);
-      for(let i=0;i<12;i++) this.worldGroup.add(this.add.image(80+i*110,90+Math.sin(i)*18,'cloud').setAlpha(.34).setScale(1.2));
-      g.lineStyle(1,0xbfdbfe,.28); for(let i=0;i<70;i++){ const x=Phaser.Math.Between(0,1280), y=Phaser.Math.Between(0,520); g.beginPath(); g.moveTo(x,y); g.lineTo(x-8,y+22); g.strokePath(); }
-    } else if(ch.place==='茶山'){
-      for(let i=0;i<7;i++) this.worldGroup.add(this.add.image(120+i*190,545-(i%2)*25,'hill').setAlpha(.65));
-    } else {
-      for(let i=0;i<16;i++) this.worldGroup.add(this.add.image(40+i*85,500+(i%3)*18,'bamboo').setAlpha(.62).setScale(1.1+(i%2)*.2));
-    }
-    g.fillStyle(0x2f2316,.78).fillRoundedRect(0,530,1280,120,40).fillStyle(0x1f2937,.22).fillRoundedRect(0,558,1280,24,12);
-  }
-
-  loadChapter(index){
-    const ch=chapters[index]; state.chapterIndex=index; state.collected=0; state.locked=true; this.clearWorld(); this.paintBackground(ch);
-    ui.chapter.textContent=ch.title; ui.score.textContent=`生态值 ${state.score}`; ui.task.textContent=`任务 0 / ${ch.target}`;
-    this.platforms.create(640,610,'platform').setScale(6,1).refreshBody();
-    this.platforms.create(350,455,'platform'); this.platforms.create(650,365,'platform'); this.platforms.create(955,455,'platform');
-    ch.items.forEach((it,idx)=>{ const obj=this.items.create(it.x,it.y,'eco'); obj.setData('label',it.label); obj.setData('index',idx); const label=this.add.text(it.x,it.y-34,it.label,{fontSize:'13px',color:'#ecfccb',backgroundColor:'rgba(20,83,45,.55)',padding:{x:6,y:3}}).setOrigin(.5); obj.setData('labelObj',label); this.worldGroup.add(label); });
-    ch.hazards.forEach(h=>{ const hz=this.hazards.create(h.x,h.y,'hazard'); hz.displayWidth=h.w; hz.displayHeight=h.h; hz.refreshBody(); this.worldGroup.add(this.add.text(h.x,h.y-26,h.label,{fontSize:'13px',color:'#fee2e2',backgroundColor:'rgba(127,29,29,.62)',padding:{x:6,y:3}}).setOrigin(.5)); });
-    this.player.setPosition(110,460); this.player.setVelocity(0,0); this.cameras.main.flash(360,255,255,255);
-  }
-
-  playDialogue(lines){ state.dialogueQueue=lines; state.currentLine=0; state.locked=true; this.showLine(); }
-  showLine(){ const line=state.dialogueQueue[state.currentLine]; if(!line){this.hideDialogue();return;} ui.speaker.textContent=line[0]; ui.text.textContent=line[1]; ui.dialog.style.display='block'; ui.next.style.display='inline-block'; ui.skip.style.display='inline-block'; }
-  advanceDialogue(){ state.currentLine++; state.currentLine>=state.dialogueQueue.length ? this.hideDialogue() : this.showLine(); }
-  hideDialogue(){ ui.dialog.style.display='none'; ui.next.style.display='none'; ui.skip.style.display='none'; state.locked=false; }
-
-  collectItem(player,item){
-    const labelObj=item.getData('labelObj'); if(labelObj) labelObj.destroy(); item.disableBody(true,true);
-    const ch=chapters[state.chapterIndex]; state.collected++; state.score+=10; ui.score.textContent=`生态值 ${state.score}`; ui.task.textContent=`任务 ${state.collected} / ${ch.target}`;
-    const txt=this.add.text(item.x,item.y-42,'+10 生态值',{fontSize:'18px',color:'#bbf7d0',fontStyle:'bold'}).setOrigin(.5);
-    this.tweens.add({targets:txt,y:item.y-88,alpha:0,duration:850,onComplete:()=>txt.destroy()});
-    if(state.collected>=ch.target) this.finishChapter();
-  }
-
-  hitHazard(player){ if(state.locked) return; state.score=Math.max(0,state.score-5); ui.score.textContent=`生态值 ${state.score}`; player.setVelocityX(-260); player.setTint(0xff9f9f); this.time.delayedCall(250,()=>player.clearTint()); }
-
-  finishChapter(){
-    state.locked=true; const idx=state.chapterIndex, ch=chapters[idx];
-    if(idx<chapters.length-1){
-      this.playDialogue([['系统提示',`${ch.title}完成：${ch.itemName}已收集，生态值提升。`],['巡护员','继续前进。真正的保护，是把每一次观看变成理解。']]);
-      const wait=setInterval(()=>{ if(!state.locked){ clearInterval(wait); this.loadChapter(idx+1); this.playDialogue(chapters[idx+1].lines); } },200);
-    } else { ui.endingText.textContent=`最终生态值：${state.score}。小雨团回到了更安静、更完整的栖息地。你完成了雨城路线识别、森林清理、茶山知识收集与栖息地守护任务。`; ui.ending.style.display='flex'; }
-  }
-
-  update(){
-    if(!state.started || state.locked){ this.player.setVelocityX(0); return; }
-    const left=this.cursors.left.isDown||this.keys.A.isDown, right=this.cursors.right.isDown||this.keys.D.isDown, jump=this.cursors.up.isDown||this.keys.W.isDown||this.keys.SPACE.isDown;
-    if(left){ this.player.setVelocityX(-230); this.player.setFlipX(true); } else if(right){ this.player.setVelocityX(230); this.player.setFlipX(false); } else this.player.setVelocityX(0);
-    if(jump && this.player.body.touching.down) this.player.setVelocityY(-450);
-  }
-}
-
-if (!window.Phaser) {
-  ui.start.addEventListener('click', () => alert('游戏引擎加载失败，请刷新页面或检查网络。'));
-} else {
-  new Phaser.Game({
-    type: Phaser.AUTO,
-    parent:'game',
-    width:1280,
-    height:720,
-    backgroundColor:'#082f49',
-    scale:{ mode:Phaser.Scale.FIT, autoCenter:Phaser.Scale.CENTER_BOTH },
-    physics:{ default:'arcade', arcade:{ gravity:{y:900}, debug:false } },
-    scene: MainScene
-  });
-}
+const platforms=[[0,610,1280,90],[250,470,220,24],[540,380,220,24],[850,470,220,24]];
+const keys={l:false,r:false,u:false};
+const player={x:110,y:500,w:54,h:64,vx:0,vy:0,on:false,face:1};
+const state={started:false,locked:true,chapter:0,score:0,got:0,line:0,items:[]};
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function resetPlayer(){player.x=110;player.y=500;player.vx=0;player.vy=0;}
+function sync(){const c=chapters[state.chapter];ui.chapter.textContent=c.title;ui.score.textContent=`生态值 ${state.score}`;ui.task.textContent=`任务 ${state.got} / ${c.target}`;}
+function loadChapter(i){state.chapter=i;state.got=0;state.locked=true;state.items=chapters[i].items.map(v=>({x:v[0],y:v[1],label:v[2],got:false}));resetPlayer();sync();}
+function showDialogue(lines){state.lines=lines;state.line=0;state.locked=true;showLine();}
+function showLine(){const l=state.lines[state.line];if(!l){hideDialogue();return;}ui.speaker.textContent=l[0];ui.text.textContent=l[1];ui.dialog.style.display='block';ui.next.style.display='inline-block';ui.skip.style.display='inline-block';}
+function nextLine(){state.line++;state.line>=state.lines.length?hideDialogue():showLine();}
+function hideDialogue(){ui.dialog.style.display='none';ui.next.style.display='none';ui.skip.style.display='none';state.locked=false;}
+function start(){ui.cover.style.display='none';state.started=true;showDialogue(chapters[state.chapter].lines);}
+function restart(){ui.ending.style.display='none';state.score=0;loadChapter(0);state.started=true;showDialogue(chapters[0].lines);}
+ui.start.onclick=start;ui.next.onclick=nextLine;ui.skip.onclick=hideDialogue;ui.restart.onclick=restart;
+ui.start.addEventListener('touchstart',e=>{e.preventDefault();start();},{passive:false});
+document.addEventListener('keydown',e=>{if(['ArrowLeft','a','A'].includes(e.key))keys.l=true;if(['ArrowRight','d','D'].includes(e.key))keys.r=true;if(['ArrowUp','w','W',' '].includes(e.key)){keys.u=true;e.preventDefault();}});
+document.addEventListener('keyup',e=>{if(['ArrowLeft','a','A'].includes(e.key))keys.l=false;if(['ArrowRight','d','D'].includes(e.key))keys.r=false;if(['ArrowUp','w','W',' '].includes(e.key))keys.u=false;});
+function hit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+function itemHit(it){const rx=player.x+player.w/2-it.x,ry=player.y+player.h/2-it.y;return rx*rx+ry*ry<45*45;}
+function finish(){state.locked=true;const i=state.chapter,c=chapters[i];if(i<chapters.length-1){showDialogue([['系统提示',`${c.title}完成：${c.itemName}已收集，生态值提升。`],['巡护员','继续前进。真正的保护，是把每一次观看变成理解。']]);const t=setInterval(()=>{if(!state.locked){clearInterval(t);loadChapter(i+1);showDialogue(chapters[i+1].lines);}},180);}else{ui.endingText.textContent=`最终生态值：${state.score}。小雨团回到了更安静、更完整的栖息地。你完成了雨城路线识别、森林清理、茶山知识收集与栖息地守护任务。`;ui.ending.style.display='flex';}}
+function update(){if(state.started&&!state.locked){player.vx=0;if(keys.l){player.vx=-5;player.face=-1;}if(keys.r){player.vx=5;player.face=1;}if(keys.u&&player.on){player.vy=-16;player.on=false;}}else player.vx=0;player.vy+=.75;player.x+=player.vx;player.y+=player.vy;player.x=Math.max(0,Math.min(W-player.w,player.x));player.on=false;for(const p of platforms){const r={x:p[0],y:p[1],w:p[2],h:p[3]};if(hit(player,r)&&player.vy>=0&&player.y+player.h-player.vy<=r.y+10){player.y=r.y-player.h;player.vy=0;player.on=true;}}if(player.y>H)resetPlayer();const c=chapters[state.chapter];for(const it of state.items){if(!it.got&&itemHit(it)){it.got=true;state.got++;state.score+=10;sync();if(state.got>=c.target)finish();}}if(!state.locked){for(const h of c.hazards){const r={x:h[0],y:h[1],w:h[2],h:h[3]};if(hit(player,r)){state.score=Math.max(0,state.score-1);sync();player.x-=18*player.face;}}}}
+function bg(c){const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,c.top);g.addColorStop(1,c.bottom);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(15,23,42,.18)';ctx.beginPath();ctx.moveTo(-50,520);ctx.lineTo(220,210);ctx.lineTo(520,520);ctx.fill();ctx.beginPath();ctx.moveTo(320,520);ctx.lineTo(610,170);ctx.lineTo(940,520);ctx.fill();ctx.beginPath();ctx.moveTo(760,520);ctx.lineTo(1050,220);ctx.lineTo(1360,520);ctx.fill();if(c.place==='雨城'){ctx.strokeStyle='rgba(191,219,254,.28)';for(let i=0;i<70;i++){let x=(i*83)%W,y=(i*47)%520;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-8,y+22);ctx.stroke();}}if(c.place==='茶山'){ctx.fillStyle='rgba(101,163,13,.6)';for(let i=0;i<7;i++){ctx.beginPath();ctx.ellipse(130+i*190,550-(i%2)*25,120,45,0,0,Math.PI*2);ctx.fill();}}if(c.place==='森林'||c.place==='栖息地'){ctx.fillStyle='rgba(74,222,128,.28)';for(let i=0;i<16;i++)ctx.fillRect(40+i*80,430+(i%3)*16,14,130);}ctx.fillStyle='rgba(47,35,22,.82)';rr(0,590,1280,90,34);ctx.fill();}
+function panda(){const x=player.x+player.w/2,y=player.y+26;ctx.save();ctx.translate(x,y);ctx.scale(player.face,1);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,0,24,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(0,36,28,0,Math.PI*2);ctx.fill();ctx.fillStyle='#111827';for(const [x,y,r] of [[-18,-12,10],[18,-12,10],[0,11,4]]){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}ctx.beginPath();ctx.ellipse(-9,2,8,11,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(9,2,8,11,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-9,1,2.5,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(9,1,2.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#111827';ctx.beginPath();ctx.ellipse(-22,36,8,20,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(22,36,8,20,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#86efac';rr(-12,50,24,10,5);ctx.fill();ctx.restore();}
+function draw(){const c=chapters[state.chapter];bg(c);for(const p of platforms){ctx.fillStyle='#3f6212';rr(p[0],p[1],p[2],p[3],10);ctx.fill();ctx.fillStyle='#84cc16';rr(p[0],p[1],p[2],7,4);ctx.fill();}for(const h of c.hazards){ctx.fillStyle='#ef4444';rr(h[0],h[1],h[2],h[3],8);ctx.fill();ctx.fillStyle='#fee2e2';ctx.font='14px Microsoft YaHei';ctx.textAlign='center';ctx.fillText(h[4],h[0]+h[2]/2,h[1]-10);}for(const it of state.items){if(it.got)continue;ctx.fillStyle='#86efac';ctx.beginPath();ctx.arc(it.x,it.y,17,0,Math.PI*2);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(it.x,it.y,11,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#052e16';ctx.beginPath();ctx.moveTo(it.x,it.y-10);ctx.lineTo(it.x+10,it.y+10);ctx.lineTo(it.x-10,it.y+10);ctx.fill();ctx.fillStyle='#ecfccb';ctx.font='14px Microsoft YaHei';ctx.textAlign='center';ctx.fillText(it.label,it.x,it.y-28);}panda();}
+function loop(){update();draw();requestAnimationFrame(loop);}loadChapter(0);loop();
