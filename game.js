@@ -42,10 +42,22 @@ const chapters = [
 ];
 
 const state = { started:false, chapterIndex:0, score:0, collected:0, locked:true, dialogueQueue:[], currentLine:0 };
+let sceneInstance = null;
+
+function startGame(){
+  ui.cover.style.display = 'none';
+  state.started = true;
+  if (sceneInstance) sceneInstance.playDialogue(chapters[state.chapterIndex].lines);
+}
+
+ui.start.addEventListener('click', startGame);
+ui.start.addEventListener('touchstart', (event) => { event.preventDefault(); startGame(); }, {passive:false});
 
 class MainScene extends Phaser.Scene {
   constructor(){ super('main'); }
+
   create(){
+    sceneInstance = this;
     this.makeTextures();
     this.cursors = this.input.keyboard.createCursorKeys();
     this.keys = this.input.keyboard.addKeys('A,D,W,SPACE');
@@ -60,11 +72,11 @@ class MainScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.items, this.collectItem, null, this);
     this.physics.add.overlap(this.player, this.hazards, this.hitHazard, null, this);
     this.loadChapter(0);
-    ui.start.addEventListener('click', () => { ui.cover.style.display='none'; state.started=true; this.playDialogue(chapters[state.chapterIndex].lines); });
     ui.next.addEventListener('click', () => this.advanceDialogue());
     ui.skip.addEventListener('click', () => this.hideDialogue());
     ui.restart.addEventListener('click', () => { ui.ending.style.display='none'; state.score=0; state.chapterIndex=0; state.started=true; this.loadChapter(0); this.playDialogue(chapters[0].lines); });
   }
+
   makeTextures(){
     const g=this.add.graphics();
     g.fillStyle(0xffffff,1).fillCircle(32,28,22).fillCircle(32,56,24);
@@ -73,16 +85,24 @@ class MainScene extends Phaser.Scene {
     g.fillStyle(0x111827,1).fillCircle(32,36,4).fillEllipse(15,55,12,22).fillEllipse(49,55,12,22);
     g.fillStyle(0x86efac,1).fillRoundedRect(23,67,18,8,4);
     g.generateTexture('panda',64,82);
+
     g.clear().fillStyle(0x86efac,1).fillCircle(16,16,14).lineStyle(3,0xffffff,.8).strokeCircle(16,16,10).fillStyle(0x052e16,1).fillTriangle(16,6,25,23,7,23).generateTexture('eco',32,32);
     g.clear().fillStyle(0xef4444,1).fillRoundedRect(0,0,110,24,8).lineStyle(2,0xffffff,.45).strokeRoundedRect(3,3,104,18,6).generateTexture('hazard',110,24);
     g.clear().fillStyle(0x3f6212,1).fillRoundedRect(0,0,220,22,10).fillStyle(0x84cc16,1).fillRoundedRect(0,0,220,7,4).generateTexture('platform',220,22);
     g.clear().fillStyle(0xffffff,.9).fillCircle(22,20,16).fillCircle(42,16,20).fillCircle(64,21,15).fillRoundedRect(18,22,58,16,8).generateTexture('cloud',90,44);
-    g.clear().fillStyle(0x166534,1).fillRoundedRect(12,10,12,90,6).fillStyle(0x4ade80,1).fillEllipse(10,20,36,12,-0.5).fillEllipse(31,36,36,12,0.5).fillEllipse(8,54,36,12,-0.5).fillEllipse(32,72,36,12,0.5).generateTexture('bamboo',44,110);
+
+    g.clear().fillStyle(0x166534,1).fillRoundedRect(12,10,12,90,6).fillStyle(0x4ade80,1);
+    g.fillEllipse(10,20,36,12); g.fillEllipse(31,36,36,12); g.fillEllipse(8,54,36,12); g.fillEllipse(32,72,36,12);
+    g.generateTexture('bamboo',44,110);
+
     g.clear().fillStyle(0x65a30d,1).fillEllipse(110,58,240,88).lineStyle(3,0x365314,.45);
     for(let i=0;i<8;i++){ g.beginPath(); g.moveTo(10+i*28,64); g.lineTo(40+i*28,35); g.strokePath(); }
-    g.generateTexture('hill',240,90); g.destroy();
+    g.generateTexture('hill',240,90);
+    g.destroy();
   }
+
   clearWorld(){ this.worldGroup.clear(true,true); this.platforms.clear(true,true); this.items.clear(true,true); this.hazards.clear(true,true); }
+
   paintBackground(ch){
     const g=this.add.graphics(); this.worldGroup.add(g);
     g.fillGradientStyle(ch.top,ch.top,ch.bottom,ch.bottom,1).fillRect(0,0,1280,720);
@@ -98,6 +118,7 @@ class MainScene extends Phaser.Scene {
     }
     g.fillStyle(0x2f2316,.78).fillRoundedRect(0,530,1280,120,40).fillStyle(0x1f2937,.22).fillRoundedRect(0,558,1280,24,12);
   }
+
   loadChapter(index){
     const ch=chapters[index]; state.chapterIndex=index; state.collected=0; state.locked=true; this.clearWorld(); this.paintBackground(ch);
     ui.chapter.textContent=ch.title; ui.score.textContent=`生态值 ${state.score}`; ui.task.textContent=`任务 0 / ${ch.target}`;
@@ -107,10 +128,12 @@ class MainScene extends Phaser.Scene {
     ch.hazards.forEach(h=>{ const hz=this.hazards.create(h.x,h.y,'hazard'); hz.displayWidth=h.w; hz.displayHeight=h.h; hz.refreshBody(); this.worldGroup.add(this.add.text(h.x,h.y-26,h.label,{fontSize:'13px',color:'#fee2e2',backgroundColor:'rgba(127,29,29,.62)',padding:{x:6,y:3}}).setOrigin(.5)); });
     this.player.setPosition(110,460); this.player.setVelocity(0,0); this.cameras.main.flash(360,255,255,255);
   }
+
   playDialogue(lines){ state.dialogueQueue=lines; state.currentLine=0; state.locked=true; this.showLine(); }
   showLine(){ const line=state.dialogueQueue[state.currentLine]; if(!line){this.hideDialogue();return;} ui.speaker.textContent=line[0]; ui.text.textContent=line[1]; ui.dialog.style.display='block'; ui.next.style.display='inline-block'; ui.skip.style.display='inline-block'; }
   advanceDialogue(){ state.currentLine++; state.currentLine>=state.dialogueQueue.length ? this.hideDialogue() : this.showLine(); }
   hideDialogue(){ ui.dialog.style.display='none'; ui.next.style.display='none'; ui.skip.style.display='none'; state.locked=false; }
+
   collectItem(player,item){
     const labelObj=item.getData('labelObj'); if(labelObj) labelObj.destroy(); item.disableBody(true,true);
     const ch=chapters[state.chapterIndex]; state.collected++; state.score+=10; ui.score.textContent=`生态值 ${state.score}`; ui.task.textContent=`任务 ${state.collected} / ${ch.target}`;
@@ -118,7 +141,9 @@ class MainScene extends Phaser.Scene {
     this.tweens.add({targets:txt,y:item.y-88,alpha:0,duration:850,onComplete:()=>txt.destroy()});
     if(state.collected>=ch.target) this.finishChapter();
   }
+
   hitHazard(player){ if(state.locked) return; state.score=Math.max(0,state.score-5); ui.score.textContent=`生态值 ${state.score}`; player.setVelocityX(-260); player.setTint(0xff9f9f); this.time.delayedCall(250,()=>player.clearTint()); }
+
   finishChapter(){
     state.locked=true; const idx=state.chapterIndex, ch=chapters[idx];
     if(idx<chapters.length-1){
@@ -126,6 +151,7 @@ class MainScene extends Phaser.Scene {
       const wait=setInterval(()=>{ if(!state.locked){ clearInterval(wait); this.loadChapter(idx+1); this.playDialogue(chapters[idx+1].lines); } },200);
     } else { ui.endingText.textContent=`最终生态值：${state.score}。小雨团回到了更安静、更完整的栖息地。你完成了雨城路线识别、森林清理、茶山知识收集与栖息地守护任务。`; ui.ending.style.display='flex'; }
   }
+
   update(){
     if(!state.started || state.locked){ this.player.setVelocityX(0); return; }
     const left=this.cursors.left.isDown||this.keys.A.isDown, right=this.cursors.right.isDown||this.keys.D.isDown, jump=this.cursors.up.isDown||this.keys.W.isDown||this.keys.SPACE.isDown;
@@ -134,13 +160,17 @@ class MainScene extends Phaser.Scene {
   }
 }
 
-new Phaser.Game({
-  type: Phaser.AUTO,
-  parent:'game',
-  width:1280,
-  height:720,
-  backgroundColor:'#082f49',
-  scale:{ mode:Phaser.Scale.FIT, autoCenter:Phaser.Scale.CENTER_BOTH },
-  physics:{ default:'arcade', arcade:{ gravity:{y:900}, debug:false } },
-  scene: MainScene
-});
+if (!window.Phaser) {
+  ui.start.addEventListener('click', () => alert('游戏引擎加载失败，请刷新页面或检查网络。'));
+} else {
+  new Phaser.Game({
+    type: Phaser.AUTO,
+    parent:'game',
+    width:1280,
+    height:720,
+    backgroundColor:'#082f49',
+    scale:{ mode:Phaser.Scale.FIT, autoCenter:Phaser.Scale.CENTER_BOTH },
+    physics:{ default:'arcade', arcade:{ gravity:{y:900}, debug:false } },
+    scene: MainScene
+  });
+}
