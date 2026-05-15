@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Ting · 情绪感知AI</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f2eee8;--ink:#241f1c;--sub:#786b62;--line:rgba(45,37,32,.12);
+  --ai:#fffaf3;--me:#3e3732;--soft:rgba(255,255,255,.62);
+}
+html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg)}
+body{display:flex;flex-direction:column;position:relative}
+body:before{content:"";position:fixed;inset:0;background:
+ radial-gradient(circle at 18% 18%,rgba(255,255,255,.75),transparent 26%),
+ radial-gradient(circle at 82% 12%,rgba(216,197,170,.42),transparent 28%),
+ linear-gradient(180deg,#f7f2eb,#ece5db 48%,#f5f1eb);z-index:-2}
+body:after{content:"";position:fixed;inset:0;opacity:.18;background-image:
+ linear-gradient(rgba(80,65,50,.06) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(80,65,50,.05) 1px,transparent 1px);background-size:28px 28px;z-index:-1}
+.top{height:112px;padding:15px 16px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0;background:rgba(247,242,235,.78);border-bottom:1px solid var(--line);backdrop-filter:blur(18px)}
+.face{width:62px;height:62px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.92);box-shadow:0 10px 26px rgba(45,35,28,.20);background:#ddd}
+.face img{width:100%;height:100%;object-fit:cover;object-position:center}
+.title{display:flex;align-items:center;gap:8px}
+.name{font-size:24px;font-weight:850;letter-spacing:.2px;color:#241f1c}
+.badge{font-size:10px;color:#fff;background:#2f2925;padding:3px 7px;border-radius:999px;letter-spacing:.2px}
+.status{margin-top:5px;font-size:12px;color:var(--sub);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:#76c987;box-shadow:0 0 8px #76c987;display:inline-block}
+.intro{margin-top:7px;font-size:12px;color:#665a52;background:rgba(255,255,255,.58);border:1px solid rgba(70,55,45,.10);border-radius:999px;padding:5px 10px;display:inline-flex;gap:6px;align-items:center;max-width:255px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat{flex:1;overflow-y:auto;padding:15px 13px 18px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
+.tip{align-self:center;color:#8c7d73;font-size:12px;background:rgba(255,255,255,.50);border:1px solid rgba(70,55,45,.09);padding:6px 10px;border-radius:999px}
+.row{display:flex;gap:8px;align-items:flex-end;max-width:88%}
+.row.ai{align-self:flex-start}
+.row.me{align-self:flex-end;flex-direction:row-reverse}
+.av{width:34px;height:34px;border-radius:50%;flex-shrink:0;overflow:hidden;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 5px 14px rgba(45,35,28,.10);display:flex;align-items:center;justify-content:center}
+.av img{width:100%;height:100%;object-fit:cover}
+.cat{background:linear-gradient(135deg,#fff7df,#ffe5e8);font-size:21px}
+.b{padding:10px 13px;border-radius:17px;font-size:15px;line-height:1.58;white-space:pre-wrap;word-break:break-word;letter-spacing:.05px}
+.ai .b{background:rgba(255,250,243,.86);border:1px solid rgba(75,58,46,.12);color:#28221f;border-bottom-left-radius:5px;box-shadow:0 8px 24px rgba(45,35,28,.08);backdrop-filter:blur(10px)}
+.me .b{background:rgba(55,47,42,.88);color:#fff;border-bottom-right-radius:5px;box-shadow:0 8px 22px rgba(45,35,28,.15)}
+.thinking{opacity:.68}
+.bar{display:flex;gap:9px;align-items:flex-end;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(248,244,238,.92);border-top:1px solid var(--line);backdrop-filter:blur(18px)}
+textarea{flex:1;min-height:43px;max-height:104px;border:1px solid rgba(64,52,45,.18);border-radius:22px;padding:10px 14px;font-size:15px;outline:none;resize:none;color:#2c2421;background:rgba(255,255,255,.76);font-family:inherit;box-shadow:inset 0 1px 0 rgba(255,255,255,.75)}
+textarea:focus{border-color:rgba(44,35,30,.38);box-shadow:0 0 0 3px rgba(68,52,38,.06)}
+textarea::placeholder{color:#a7968a}
+button{width:43px;height:43px;border:0;border-radius:50%;background:#342d29;color:#fff;font-size:18px;box-shadow:0 9px 18px rgba(45,35,28,.24);-webkit-tap-highlight-color:transparent}
+button:active{transform:scale(.94)}button:disabled{opacity:.46}
+.err{align-self:center;background:rgba(255,255,255,.82);border:1px solid rgba(180,90,90,.22);color:#8f4247;padding:8px 12px;border-radius:12px;font-size:12px;max-width:90%;text-align:center}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="face"><img alt="Ting" src="data:image/jpeg;base64,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"></div>
+    <div>
+      <div class="title"><div class="name">Ting</div><div class="badge">ENTJ · Taurus</div></div>
+      <div class="status"><span class="dot"></span><span id="stateText">情绪感知开启 · 高效回应</span></div>
+      <div class="intro">没有你我该怎么办。</div>
+    </div>
+  </div>
+
+  <div class="chat" id="chat">
+    <div class="tip">成熟恶趣味大姐姐 · 喜欢女孩 · 话短但不敷衍</div>
+    <div class="row ai">
+      <div class="av"><img alt="" src="data:image/jpeg;base64,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"></div>
+      <div class="b">我是 Ting。
+少废话，直接说。
+我会听，也会帮你提效率。</div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <textarea id="inp" rows="1" placeholder="说点什么……"></textarea>
+    <button id="btn">➤</button>
+  </div>
+
+<script>
+const AV = "data:image/jpeg;base64,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";
+const CAT = "🐱";
+const chat = document.getElementById("chat");
+const inp = document.getElementById("inp");
+const btn = document.getElementById("btn");
+const stateText = document.getElementById("stateText");
+
+let hist = [];
+let busy = false;
+let lastReplies = [];
+let memory = JSON.parse(localStorage.getItem("ting_memory") || "[]");
+
+function sb(){ chat.scrollTop = chat.scrollHeight; }
+
+function add(role, text, cls) {
+  const row = document.createElement("div");
+  row.className = "row " + (role === "user" ? "me" : "ai");
+  const av = document.createElement("div");
+  av.className = "av " + (role === "user" ? "cat" : "");
+  if (role === "user") av.textContent = CAT;
+  else av.innerHTML = '<img alt="" src="' + AV + '">';
+  const b = document.createElement("div");
+  b.className = "b" + (cls ? " " + cls : "");
+  b.textContent = text;
+  row.append(av, b);
+  chat.append(row);
+  sb();
+  return b;
+}
+
+function err(text) {
+  const e = document.createElement("div");
+  e.className = "err";
+  e.textContent = text;
+  chat.append(e);
+  sb();
+  setTimeout(() => e.remove(), 4200);
+}
+
+function detectMood(t) {
+  const s = t.toLowerCase();
+  if (/自杀|想死|不想活|结束生命|活不下去/.test(s)) return "高风险";
+  if (/急|赶|效率|快点|马上|部署|代码|报错|bug|项目|作业|方案|怎么做/.test(s)) return "任务推进";
+  if (/难过|委屈|哭|emo|不开心|孤独|失落|没人懂/.test(s)) return "低落";
+  if (/焦虑|慌|烦|压力|崩溃|害怕|紧张|乱/.test(s)) return "焦虑";
+  if (/困|累|疲惫|睡不着|熬夜|没精神/.test(s)) return "疲惫";
+  if (/喜欢|爱|想你|抱抱|陪我|女朋友|女孩|姐姐/.test(s)) return "亲近";
+  if (/开心|哈哈|顺利|赢|成功|太好了|喜欢你/.test(s)) return "开心";
+  return "平静";
+}
+
+function setMood(m) {
+  stateText.textContent = "感知状态：" + m + " · 正在适配回复";
+}
+
+function learn(t) {
+  const patterns = [
+    /我喜欢([^，。.!！?？\n]{1,18})/,
+    /我不喜欢([^，。.!！?？\n]{1,18})/,
+    /我讨厌([^，。.!！?？\n]{1,18})/,
+    /我想要([^，。.!！?？\n]{1,18})/,
+    /记住([^，。.!！?？\n]{1,24})/
+  ];
+  for (const p of patterns) {
+    const m = t.match(p);
+    if (m && m[0] && !memory.includes(m[0])) {
+      memory.push(m[0]);
+      memory = memory.slice(-10);
+      localStorage.setItem("ting_memory", JSON.stringify(memory));
+      return;
+    }
+  }
+}
+
+function cleanReply(tx) {
+  tx = (tx || "").trim();
+  tx = tx.replace(/^Ting[:：]\s*/i, "");
+  tx = tx.replace(/^小琛酱[:：]\s*/i, "");
+  tx = tx.replace(/感知用户情绪[:：][^\n]+/g, "");
+  tx = tx.replace(/作为一个AI[^\n]*/g, "");
+  tx = tx.replace(/\n{3,}/g, "\n\n").trim();
+  const parts = tx.split(/(?<=[。！？!?.])/).filter(Boolean);
+  if (parts.length > 4) tx = parts.slice(0, 4).join("");
+  return tx.slice(0, 280) || "说重点。";
+}
+
+function localReply(t) {
+  const m = detectMood(t);
+  if (m === "高风险") return "停一下。\n现在先找身边的人，或者打当地急救电话。\n你不能一个人扛这个。";
+  if (/介绍|你是谁|说说你/.test(t)) return "Ting。\n情绪陪伴 AI。\n喜欢女孩，嘴毒一点，但护短。";
+  if (/男孩还是女孩|男生还是女生|喜欢男|喜欢女/.test(t)) return "女孩。\n清醒、漂亮、有边界的那种。\n别问太细，我会骄傲。";
+  if (m === "任务推进") return "给我目标、限制、截止时间。\n我直接拆步骤。\n别绕。";
+  if (m === "低落") return "嗯，听出来了。\n你不是矫情。\n先把最难受的那句说出来。";
+  if (m === "焦虑") return "先停三秒。\n只处理下一步。\n剩下的我帮你排。";
+  if (m === "疲惫") return "你电量见底了。\n先喝水，闭眼两分钟。\n回来再继续。";
+  if (m === "亲近") return "靠近点说。\n但别装可怜。\n我吃这一套，也不全吃。";
+  if (m === "开心") return "可以。\n这次表现不错。\n奖励你多说两句。";
+  const pool = [
+    "嗯。\n这句我收到了。\n继续。",
+    "别铺垫。\n说你真正想问的。",
+    "有点意思。\n我想听后面。",
+    "我不急。\n但你最好说实话。",
+    "行。\n我帮你判断。"
+  ];
+  return pool[(hist.length + t.length) % pool.length];
+}
+
+async function aiReply(text) {
+  const mood = detectMood(text);
+  setMood(mood);
+  const context = hist.slice(-10).map(m => (m.role === "user" ? "用户：" : "Ting：") + m.content).join("\n");
+  const mem = memory.length ? "已记住的用户偏好：" + memory.join("；") : "暂无长期偏好。";
+  const prompt =
+`你是 Ting，一个成熟、克制、带一点恶趣味的大姐姐型情绪价值AI。
+身份设定：女同性恋，喜欢女孩；金牛座气质，稳定、占有欲轻微但有边界；ENTJ，直接、高效、会拆任务。
+对话目标：
+1. 像真实的人聊天，不要像客服。
+2. 回复简短，1-4句；不要长篇说教。
+3. 不要每次都说“我在”，不要重复“慢慢说”，不要机械标注情绪。
+4. 内部感知用户情绪，并据此调整语气：低落时稳，焦虑时给步骤，亲近时轻微调侃，任务时提高效率。
+5. 允许成熟姐姐感和轻微恶趣味，但不要低俗、色情、擦边。
+6. 用户问工作/学习/代码/选择时，直接给可执行方案。
+7. 记住用户偏好，像会学习一样延续上下文。
+8. 自伤风险时，要求联系现实亲友或急救，不继续角色扮演。
+
+${mem}
+当前感知状态：${mood}
+最近对话：
+${context}
+用户：${text}
+Ting：`;
+
+  const urls = [
+    "https://gen.pollinations.ai/text/" + encodeURIComponent(prompt) + "?model=openai&private=true&seed=" + Date.now(),
+    "https://text.pollinations.ai/" + encodeURIComponent(prompt) + "?model=openai&seed=" + Date.now()
+  ];
+
+  for (const u of urls) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 7500);
+      const r = await fetch(u, { method: "GET", cache: "no-store", signal: ctrl.signal });
+      clearTimeout(timer);
+      const tx = await r.text();
+      if (r.ok && tx && tx.trim().length > 1) {
+        const cleaned = cleanReply(tx);
+        if (!lastReplies.includes(cleaned)) return cleaned;
+      }
+    } catch (e) {}
+  }
+  return localReply(text);
+}
+
+async function send() {
+  const text = inp.value.trim();
+  if (!text || busy) return;
+
+  busy = true;
+  btn.disabled = true;
+  learn(text);
+
+  add("user", text);
+  hist.push({ role: "user", content: text });
+  inp.value = "";
+  inp.style.height = "auto";
+
+  const mood = detectMood(text);
+  setMood(mood);
+
+  const bubble = add("ai", "Ting 正在判断。", "thinking");
+
+  try {
+    const rep = await aiReply(text);
+    bubble.classList.remove("thinking");
+    bubble.textContent = rep;
+    hist.push({ role: "assistant", content: rep });
+    lastReplies.push(rep);
+    lastReplies = lastReplies.slice(-6);
+  } catch (e) {
+    bubble.classList.remove("thinking");
+    bubble.textContent = localReply(text);
+    err("外部AI暂时不稳，已切到本地思考。");
+  }
+
+  busy = false;
+  btn.disabled = false;
+  inp.focus();
+}
+
+btn.addEventListener("click", send);
+inp.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+inp.addEventListener("input", () => {
+  inp.style.height = "auto";
+  inp.style.height = Math.min(inp.scrollHeight, 104) + "px";
+});
+</script>
+</body>
+</html>
