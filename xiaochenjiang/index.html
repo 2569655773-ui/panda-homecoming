@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>小琛酱</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:#fff0f5}body{display:flex;flex-direction:column}.header{height:86px;padding:14px 16px;display:flex;align-items:center;gap:12px;color:white;background:linear-gradient(135deg,#ff69a3,#df3f7d);box-shadow:0 6px 18px rgba(223,63,125,.22);flex-shrink:0}.avatar-main{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#fff,#ffd4e5);border:3px solid rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 12px rgba(0,0,0,.12)}.header h1{font-size:22px;line-height:1.2;font-weight:800;letter-spacing:1px}.status{margin-top:4px;font-size:13px;opacity:.9;display:flex;align-items:center;gap:5px}.green-dot{width:8px;height:8px;border-radius:50%;background:#7cff8d;box-shadow:0 0 8px #7cff8d}.chat{flex:1;overflow-y:auto;padding:18px 14px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}.tip{align-self:center;color:#d88aa5;font-size:13px;opacity:.8;margin:2px 0 8px}.row{display:flex;align-items:flex-end;gap:8px;max-width:88%}.row.ai{align-self:flex-start}.row.me{align-self:flex-end;flex-direction:row-reverse}.avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;background:#ffe1ec;border:2px solid #ffb7d0;display:flex;align-items:center;justify-content:center;font-size:18px}.avatar.me{background:#eadcff;border-color:#d8c2ff;font-size:14px}.bubble{padding:11px 14px;border-radius:18px;font-size:15px;line-height:1.65;word-break:break-word;white-space:pre-wrap}.row.ai .bubble{color:#3c1b28;background:rgba(255,255,255,.96);border:1.5px solid #ffd1df;border-bottom-left-radius:5px;box-shadow:0 4px 16px rgba(255,130,170,.13)}.row.me .bubble{color:#fff;background:linear-gradient(135deg,#ff69a3,#df3f7d);border-bottom-right-radius:5px;box-shadow:0 5px 14px rgba(223,63,125,.2)}.input-area{flex-shrink:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;align-items:flex-end;gap:9px;background:rgba(255,255,255,.96);border-top:1px solid #ffd1df;backdrop-filter:blur(10px)}textarea{flex:1;min-height:43px;max-height:110px;resize:none;outline:none;border:1.7px solid #ffd1df;border-radius:22px;padding:10px 15px;color:#3c1b28;background:#fff;font-size:15px;line-height:1.5;font-family:inherit;-webkit-appearance:none}textarea:focus{border-color:#ff69a3;box-shadow:0 0 0 3px rgba(255,105,163,.08)}textarea::placeholder{color:#e9a8bd}button{width:43px;height:43px;border:none;border-radius:50%;flex-shrink:0;color:white;background:linear-gradient(135deg,#ff69a3,#df3f7d);font-size:19px;box-shadow:0 5px 14px rgba(223,63,125,.28);-webkit-tap-highlight-color:transparent}button:active{transform:scale(.93)}.small{font-size:12px;color:#c56a8c;text-align:center;opacity:.8;padding:4px 12px}
+</style>
+</head>
+<body>
+<div class="header"><div class="avatar-main">🌸</div><div><h1>小琛酱</h1><div class="status"><span class="green-dot"></span>在线 · 才不是等你的</div></div></div>
+<div class="chat" id="chat"><div class="tip">— 不用 API Key 的公开体验版 —</div><div class="row ai"><div class="avatar">🌸</div><div class="bubble">哼，你来了啊……才不是等你的呢。有什么事就说吧，我只是顺便回复你而已！</div></div></div>
+<div class="small">公开静态版：不会泄露 Key；回复为本地角色逻辑，不调用豆包 API。</div>
+<div class="input-area"><textarea id="input" rows="1" placeholder="说点什么吧……"></textarea><button id="sendBtn">➤</button></div>
+<script>
+const chat=document.getElementById('chat'),input=document.getElementById('input'),sendBtn=document.getElementById('sendBtn');
+let turn=0;
+function scrollBottom(){chat.scrollTop=chat.scrollHeight}
+function add(role,text){const row=document.createElement('div');row.className='row '+(role==='user'?'me':'ai');const av=document.createElement('div');av.className='avatar '+(role==='user'?'me':'');av.textContent=role==='user'?'你':'🌸';const b=document.createElement('div');b.className='bubble';b.textContent=text;row.appendChild(av);row.appendChild(b);chat.appendChild(row);scrollBottom()}
+function reply(t){turn++;t=t.toLowerCase();
+ if(/你好|hi|hello|在吗/.test(t))return '哼，在啦……别误会，我只是刚好看到。\n你想聊什么就说吧，笨蛋。';
+ if(/喜欢|爱|想你|陪我|女友/.test(t))return '才、才没有因为这句话开心！\n不过你要是想让我陪你一会儿……也不是不行。';
+ if(/难过|烦|累|崩溃|emo|不开心/.test(t))return '哼，先深呼吸一下。\n不许一个人硬撑，至少现在我听你说完。\n才不是担心你，只是不想看你笨笨地难受。';
+ if(/吃|饿|饭|奶茶|蛋糕/.test(t))return '又不按时吃饭？笨蛋。\n去吃点热的，别只喝冰的。\n我才不是管你，只是顺口提醒！';
+ if(/睡|晚安|困|熬夜/.test(t))return '还不睡？你明天又要说自己没精神。\n哼，手机放下，乖一点。\n晚安……才不是特意说给你听的。';
+ if(/学习|考试|作业|比赛|项目|代码|部署/.test(t))return '别慌，一步一步来。\n你先把最小能跑的版本做出来，再慢慢变好看。\n哼，我会陪你拆任务的，别误会。';
+ if(/谢谢|感谢/.test(t))return '哼，这种小事有什么好谢的。\n你下次别把自己搞得那么着急就行了。';
+ const pool=['嗯……我听见了。你继续说，我又不会跑。','哼，说得还挺认真。那你现在最想让我怎么陪你？','别误会，我只是觉得你这句话有点可爱。','笨蛋，别一下子想太多。先把眼前这一件说清楚。','我才没有在等你回复……不过你慢点说，我在。'];
+ return pool[turn%pool.length];}
+function send(){const text=input.value.trim();if(!text)return;add('user',text);input.value='';input.style.height='auto';setTimeout(()=>add('ai',reply(text)),350)}
+sendBtn.addEventListener('click',send);input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(input.scrollHeight,110)+'px'});
+</script>
+</body></html>
